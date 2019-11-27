@@ -1,0 +1,106 @@
+const mongoose = require('mongoose');
+Schema = mongoose.Schema
+
+let itemSchema = new Schema({
+
+  itemId: {
+    type: String,
+    default: '',
+    index: true,
+    unique: true
+  },
+
+  listId: {
+    type: String,
+    default: '',
+  },
+
+  itemName: {
+    type: String,
+    default: ''
+  },
+
+  itemCreatorId: {
+    type: String,
+    default: ''
+  },
+  itemCreatorName: {
+    type: String,
+    default: ''
+  },
+
+  itemCreatedOn: {
+    type: Date,
+    default: ""
+  },
+
+  itemModifiedOn: {
+    type: Date,
+    default: ""
+  },
+
+  itemModifierId: {
+    type: String,
+    default: ''
+  },
+  itemModifierName: {
+    type: String,
+    default: ''
+  },
+
+  itemDone: {
+    type: String,
+    default: 'no'
+  },
+
+  subItems: {
+    type: [{
+
+      subItemId: {
+        type: String,
+        default: '',
+      },
+
+      subItemName: {
+        type: String,
+        default: ''
+      },
+
+      subItemCreatorId: {
+        type: String,
+        default: ''
+      },
+      subItemCreatorName: {
+        type: String,
+        default: ''
+      },
+
+      subItemCreatedOn: {
+        type: Date,
+        default: ""
+      },
+      subItemModifiedOn: {
+        type: Date,
+        default: ""
+      },
+
+      subItemModifierId: {
+        type: String,
+        default: ''
+      },
+      subItemModifierName: {
+        type: String,
+        default: ''
+      },
+
+      subItemDone: {
+        type: String,
+        default: 'no'
+      },
+
+
+    }]//subitem array end
+  }//subitems end
+})
+
+mongoose.model('Item', itemSchema);
