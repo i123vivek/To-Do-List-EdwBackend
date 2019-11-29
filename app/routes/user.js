@@ -24,11 +24,11 @@ module.exports.setRouter = (app) => {
 
     app.get(`${baseUrl}/users/:email/user/details`, auth.isAuthorized, userController.getSingleUserDetailByEmail);
 
-    app.post(`${baseUrl}/users/logout`,auth.isAuthorized, userController.logout);
+    app.post(`${baseUrl}/users/logout`, auth.isAuthorized, userController.logout);
 
     app.post(`${baseUrl}/users/forgot/password`, userController.forgotPassword);
 
-    app.post(`${baseUrl}/users/reset/:token`,userController.resetPassword);
+    app.post(`${baseUrl}/users/reset/:token`, userController.resetPassword);
 
 
     // api for mark notification as seen...
@@ -53,7 +53,7 @@ module.exports.setRouter = (app) => {
     app.post(`${baseUrl}/friends/cancel/friend/request`, auth.isAuthorized, friendController.cancelFriendRequest);
 
     app.post(`${baseUrl}/friends/unfriend/user`, auth.isAuthorized, friendController.unfriendFunction);
-    
+
 
     // api for list .............
 
@@ -97,12 +97,8 @@ module.exports.setRouter = (app) => {
 
     // api for history...........
 
-    // app.post(`${baseUrl}/history/addHistory`, auth.isAuthorized, historyController.addHistoryFunction);
+    app.get(`${baseUrl}/history/view/all/:userId/history`, auth.isAuthorized, historyController.getAllHistoryOfAUser)
 
-    // app.post(`${baseUrl}/history/deleteHistory`, auth.isAuthorized, historyController.deleteHistoryFunction);
+    app.post(`${baseUrl}/history/:historyId/delete`, auth.isAuthorized, historyController.deleteHistoryObj)
 
-    app.get(`${baseUrl}/history/:listId/getHistory`, auth.isAuthorized, historyController.getHistoryDetailsOfAList);
-
-    app.get(`${baseUrl}/history/:itemId/getHistory`, auth.isAuthorized, historyController.getHistoryDetailsOfAnItem);
-    
 }

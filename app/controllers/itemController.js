@@ -118,75 +118,34 @@ let deleteItem = (req, res) => {
                         reject(apiResponse)
                     } else {
 
-                        ListModel.find({ listId: itemDetails.listId })
-                            .exec((err, listDetails) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'itemController: findList', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-                                } else if (check.isEmpty(listDetails)) {
-                                    logger.info('No List Found', 'itemController: findList')
-                                } else {
-                                    console.log("list details here is:", listDetails)
+                        if (req.body.historyToken == 'false') {
 
-                                    let friendId = [];
+                            ListModel.find({ listId: itemDetails.listId })
+                                .exec((err, listDetails) => {
+                                    if (err) {
+                                        console.log(err)
+                                        logger.error(err.message, 'itemController: findList', 10)
+                                        let apiResponse = response.generate(true, 'Db error', 500, null)
+                                        reject(apiResponse)
+                                    } else if (check.isEmpty(listDetails)) {
+                                        logger.info('No List Found', 'itemController: findList')
+                                    } else {
 
-                                    friendId.push(listDetails.listCreatorId);
-
-                                    UserModel.find({ userId: listDetails.listCreatorId })
-                                        .select('friends')
-                                        .lean()
-                                        .exec((err, result) => {
-                                            if (err) {
-                                                console.log(err)
-                                                logger.error(err.message, 'itemController: getAllFriend', 10)
-                                                let apiResponse = response.generate(true, 'Db error', 500, null)
-                                                reject(apiResponse)
-
-                                            } else if (check.isEmpty(result)) {
-                                                logger.info('No Friend Found', 'itemController: getAllFriend')
-
-                                            } else {
-
-                                                console.log("length of friend list of user here is:", result.length)
-                                                const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                                    .map(friendId => {
-                                                        return {
-                                                            friendId: friendId
-                                                        };
-                                                    });
-                                                console.log("friend list of user here is:", friendResult)
-                                                friendId.push(friendResult);
-
-                                            }
-                                        })
-
-                                    let newHistory = new HistoryModel({
-                                        actionPerformedOn: 'item-delete',
-                                        objectToRestore: itemDetails,
-                                        //listId: itemDetails.listId,
-                                        itemId: req.params.itemId,
-                                        userFriendsId: friendId,
-                                        storedTime: time.now()
-                                    })
-
-                                    console.log("details to be saved in history before deleting item", newHistory);
-
-                                    newHistory.save((err, newHistory) => {
-                                        if (err) {
-                                            console.log(err)
-                                            logger.error(err.message, 'itemController: saveHistory :- onitemdelete', 10)
-                                            let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                            reject(apiResponse)
-                                        } else {
-                                            console.log("data saved to history", newHistory);
-                                            logger.info("data saved to history", 'itemController: saveHistory :- onitemdelete')
+                                        let newHistoryObj = {
+                                            actionPerformedOn: 'item-delete',
+                                            objectToRestore: itemDetails,
+                                            listId: itemDetails.listId,
+                                            itemId: req.params.itemId,
+                                            listCreatorUserId: listDetails.listCreatorId,
+                                            storedTime: time.now()
                                         }
-                                    })
 
-                                }
-                            })
+                                        historyController.addHistoryObjOnItemDelete(newHistoryObj);
+
+                                    }
+                                })
+
+                        }
 
                         resolve(itemDetails)
                     }
@@ -276,75 +235,32 @@ let updateItem = (req, res) => {
                         reject(apiResponse)
                     } else {
 
-                        ListModel.find({ listId: itemDetails.listId })
-                            .exec((err, listDetails) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'itemController: findList', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-                                } else if (check.isEmpty(listDetails)) {
-                                    logger.info('No List Found', 'itemController: findList')
-                                } else {
-                                    console.log("list details here is:", listDetails)
-
-                                    let friendId = [];
-
-                                    friendId.push(listDetails.listCreatorId);
-
-                                    UserModel.find({ userId: listDetails.listCreatorId })
-                                        .select('friends')
-                                        .lean()
-                                        .exec((err, result) => {
-                                            if (err) {
-                                                console.log(err)
-                                                logger.error(err.message, 'itemController: getAllFriend', 10)
-                                                let apiResponse = response.generate(true, 'Db error', 500, null)
-                                                reject(apiResponse)
-
-                                            } else if (check.isEmpty(result)) {
-                                                logger.info('No Friend Found', 'itemController: getAllFriend')
-
-                                            } else {
-
-                                                console.log("length of friend list of user here is:", result.length)
-                                                const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                                    .map(friendId => {
-                                                        return {
-                                                            friendId: friendId
-                                                        };
-                                                    });
-                                                console.log("friend list of user here is:", friendResult)
-                                                friendId.push(friendResult);
-
-                                            }
-                                        })
-
-                                    let newHistory = new HistoryModel({
-                                        actionPerformedOn: 'item-edit',
-                                        objectToRestore: itemDetails,
-                                        //listId: itemDetails.listId,
-                                        itemId: req.params.itemId,
-                                        userFriendsId: friendId,
-                                        storedTime: time.now()
-                                    })
-
-                                    console.log("details to be saved in history before editing item", newHistory);
-
-                                    newHistory.save((err, newHistory) => {
-                                        if (err) {
-                                            console.log(err)
-                                            logger.error(err.message, 'itemController: saveHistory :- onItemEdit', 10)
-                                            let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                            reject(apiResponse)
-                                        } else {
-                                            console.log("data saved to history", newHistory);
-                                            logger.info("data saved to history", 'itemController: saveHistory :- onItemEdit')
+                        if (req.body.historyToken == 'false') {
+                            ListModel.find({ listId: itemDetails.listId })
+                                .exec((err, listDetails) => {
+                                    if (err) {
+                                        console.log(err)
+                                        logger.error(err.message, 'itemController: findList', 10)
+                                        let apiResponse = response.generate(true, 'Db error', 500, null)
+                                        reject(apiResponse)
+                                    } else if (check.isEmpty(listDetails)) {
+                                        logger.info('No List Found', 'itemController: findList')
+                                    } else {
+                                        let newHistoryObj = {
+                                            actionPerformedOn: 'item-edit',
+                                            objectToRestore: itemDetails,
+                                            listId: itemDetails.listId,
+                                            itemId: req.params.itemId,
+                                            listCreatorUserId: listDetails.listCreatorId,
+                                            storedTime: time.now()
                                         }
-                                    })
 
-                                }
-                            })
+                                        historyController.addHistoryObjOnItemEdit(newHistoryObj);
+
+                                    }
+                                })
+
+                        }
 
                         resolve(itemDetails)
                     }
@@ -462,63 +378,7 @@ let addItemToAList = (req, res) => {
                         let apiResponse = response.generate(true, 'No List Found', 404, null)
                         reject(apiResponse)
                     } else {
-                        //let apiResponse = response.generate(false, 'List Details Found', 200, listDetails)
 
-                        // let friendId = [];
-
-                        // friendId.push(listDetails.listCreatorId);
-
-                        // UserModel.find({ userId: listDetails.listCreatorId })
-                        //     .select('friends')
-                        //     .lean()
-                        //     .exec((err, result) => {
-                        //         if (err) {
-                        //             console.log(err)
-                        //             logger.error(err.message, 'listController: getAllFriend', 10)
-                        //             let apiResponse = response.generate(true, 'Db error', 500, null)
-                        //             reject(apiResponse)
-
-                        //         } else if (check.isEmpty(result)) {
-                        //             logger.info('No Friend Found', 'listController: getAllFriend')
-
-                        //         } else {
-
-                        //             console.log("length of friend list of user here is:", result.length)
-                        //             const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                        //                 .map(friendId => {
-                        //                     return {
-                        //                         friendId: friendId
-                        //                     };
-                        //                 });
-                        //             console.log("friend list of user here is:", friendResult)
-                        //             friendId.push(friendResult);
-
-                        //         }
-                        //     })
-
-
-
-                        // let newHistory = new HistoryModel({
-                        //     actionPerformedOn: 'item-add',
-                        //     objectToRestore: listDetails,
-                        //     listId: req.body.listId,
-                        //     userFriendsId: friendId,
-                        //     storedTime: time.now()
-                        // })
-
-                        // console.log("details to be saved in history before adding item", newHistory);
-
-                        // newHistory.save((err, newHistory) => {
-                        //     if (err) {
-                        //         console.log(err)
-                        //         logger.error(err.message, 'itemController: saveHistory :- OnItemAdd', 10)
-                        //         let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                        //         reject(apiResponse)
-                        //     } else {
-                        //         console.log("data saved to history", newHistory);
-                        //         logger.info("data saved to history", 'itemController: saveHistory:- OnItemAdd')
-                        //     }
-                        // })
 
                         resolve(listDetails)
                     }
@@ -528,33 +388,65 @@ let addItemToAList = (req, res) => {
 
     let addItem = () => {
         return new Promise((resolve, reject) => {
-            //console.log(req.body)
-            let newItem = new ItemModel({
-                itemId: shortid.generate(),
-                listId: req.body.listId,
-                itemName: req.body.itemName,
-                itemCreatorId: req.body.itemCreatorId,
-                itemCreatorName: req.body.itemCreatorName,
-                itemModifierId: req.body.itemModifierId,
-                itemModifierName: req.body.itemModifierName,
-                itemDone: req.body.itemDone,
-                itemCreatedOn: time.now(),
-                itemModifiedOn: time.now(),
-            })
 
-            console.log(newItem)
-            newItem.save((err, newItem) => {
-                if (err) {
-                    console.log(err)
-                    logger.error(err.message, 'itemController: addItem', 10)
-                    let apiResponse = response.generate(true, 'Failed to add new Item', 500, null)
-                    reject(apiResponse)
-                } else {
-                    let newItemObj = newItem.toObject();
-                    eventEmitter.emit("new-item-created", newItemObj);
-                    resolve(newItemObj)
-                }
-            })
+            if (req.body.historyToken == 'false') {
+                let newItem = new ItemModel({
+                    itemId: shortid.generate(),
+                    listId: req.body.listId,
+                    itemName: req.body.itemName,
+                    itemCreatorId: req.body.itemCreatorId,
+                    itemCreatorName: req.body.itemCreatorName,
+                    itemModifierId: req.body.itemModifierId,
+                    itemModifierName: req.body.itemModifierName,
+                    itemDone: req.body.itemDone,
+                    itemCreatedOn: time.now(),
+                    itemModifiedOn: time.now(),
+                })
+
+                console.log(newItem);
+
+                newItem.save((err, newItem) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: addItem', 10)
+                        let apiResponse = response.generate(true, 'Failed to add new Item', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newItemObj = newItem.toObject();
+                        eventEmitter.emit("new-item-created", newItemObj);
+                        resolve(newItemObj)
+                    }
+                })
+
+            } else {
+                let newItem = new ItemModel({
+                    itemId: req.body.itemId,
+                    listId: req.body.listId,
+                    itemName: req.body.itemName,
+                    itemCreatorId: req.body.itemCreatorId,
+                    itemCreatorName: req.body.itemCreatorName,
+                    itemModifierId: req.body.itemModifierId,
+                    itemModifierName: req.body.itemModifierName,
+                    itemDone: req.body.itemDone,
+                    itemCreatedOn: req.body.itemCreatedOn,
+                    itemModifiedOn: req.body.itemModifiedOn,
+                })
+
+                console.log(newItem);
+
+                newItem.save((err, newItem) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: addItem', 10)
+                        let apiResponse = response.generate(true, 'Failed to add new Item', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newItemObj = newItem.toObject();
+                        //eventEmitter.emit("new-item-created", newItemObj);
+                        resolve(newItemObj)
+                    }
+                })
+            }
 
         })
     } // end addItem function
@@ -609,30 +501,6 @@ eventEmitter.on("new-item-created", (itemDetail) => {
 
 
 let getSubItemDetails = (req, res) => {
-
-    // let findItemDetails = () => {
-    //     return new Promise((resolve, reject) => {
-    //         ItemModel.findOne({ itemId: req.params.itemId })
-    //             .select()
-    //             .lean()
-    //             .exec((err, ItemDetails) => {
-    //                 if (err) {
-    //                     console.log(err)
-    //                     logger.error(err.message, 'itemController: findItemDetails', 10)
-    //                     let apiResponse = response.generate(true, 'Failed To Find Item Details', 500, null)
-    //                     reject(apiResponse)
-    //                 } else if (check.isEmpty(ItemDetails)) {
-    //                     logger.info('No Item Found', 'itemController:findItemDetails')
-    //                     let apiResponse = response.generate(true, 'No Item Found', 404, null)
-    //                     reject(apiResponse)
-    //                 } else {
-    //                     let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
-    //                     console.log("item detail here is:",ItemDetails)
-    //                     resolve(ItemDetails)
-    //                 }
-    //             })
-    //     })
-    // } // end findItemdetails 
 
 
     let findSubItemDetails = () => {
@@ -689,78 +557,33 @@ let addSubItemToAnItem = (req, res) => {
                         let apiResponse = response.generate(true, 'No Item Found', 404, null)
                         reject(apiResponse)
                     } else {
-                        // let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
-                        // console.log(apiResponse);
+                        if (req.body.historyToken == 'false') {
+                            ListModel.find({ listId: ItemDetails.listId })
+                                .exec((err, listDetails) => {
+                                    if (err) {
+                                        console.log(err)
+                                        logger.error(err.message, 'itemController: findList :- OnAddingSubitem', 10)
+                                        let apiResponse = response.generate(true, 'Db error', 500, null)
+                                        reject(apiResponse)
+                                    } else if (check.isEmpty(listDetails)) {
+                                        logger.info('No List Found', 'itemController: findList :- OnAddingSubitem')
+                                    } else {
+                                        console.log("list details here is:", listDetails)
 
-                        ListModel.find({ listId: ItemDetails.listId })
-                            .exec((err, listDetails) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'itemController: findList :- OnAddingSubitem', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-                                } else if (check.isEmpty(listDetails)) {
-                                    logger.info('No List Found', 'itemController: findList :- OnAddingSubitem')
-                                } else {
-                                    console.log("list details here is:", listDetails)
-
-                                    let friendId = [];
-
-                                    friendId.push(listDetails.listCreatorId);
-
-                                    UserModel.find({ userId: listDetails.listCreatorId })
-                                        .select('friends')
-                                        .lean()
-                                        .exec((err, result) => {
-                                            if (err) {
-                                                console.log(err)
-                                                logger.error(err.message, 'itemController: getAllFriend :- OnAddingSubitem', 10)
-                                                let apiResponse = response.generate(true, 'Db error', 500, null)
-                                                reject(apiResponse)
-
-                                            } else if (check.isEmpty(result)) {
-                                                logger.info('No Friend Found', 'itemController: getAllFriend :- OnAddingSubitem')
-
-                                            } else {
-
-                                                console.log("length of friend list of user here is:", result.length)
-                                                const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                                    .map(friendId => {
-                                                        return {
-                                                            friendId: friendId
-                                                        };
-                                                    });
-                                                console.log("friend list of user here is:", friendResult)
-                                                friendId.push(friendResult);
-
-                                            }
-                                        })
-
-                                    let newHistory = new HistoryModel({
-                                        actionPerformedOn: 'subItem-add',
-                                        objectToRestore: ItemDetails,
-                                        //listId: ItemDetails.listId,
-                                        itemId: req.params.itemId,
-                                        userFriendsId: friendId,
-                                        storedTime: time.now()
-                                    })
-
-                                    console.log("details to be saved in history before adding subItem to an item", newHistory);
-
-                                    newHistory.save((err, newHistory) => {
-                                        if (err) {
-                                            console.log(err)
-                                            logger.error(err.message, 'itemController: saveHistory :- onSubitem add', 10)
-                                            let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                            reject(apiResponse)
-                                        } else {
-                                            console.log("data saved to history", newHistory);
-                                            logger.info("data saved to history", 'itemController: saveHistory :- onSubItemAdd')
+                                        let newHistoryObj = {
+                                            actionPerformedOn: 'subItem-add',
+                                            objectToRestore: ItemDetails,
+                                            listId: ItemDetails.listId,
+                                            itemId: req.params.itemId,
+                                            listCreatorUserId: listDetails.listCreatorId,
+                                            storedTime: time.now()
                                         }
-                                    })
+                                        historyController.addHistoryObjOnSubItemAdd(newHistoryObj);
 
-                                }
-                            })
+                                    }
+                                })
+
+                        }
 
                         resolve(ItemDetails)
                     }
@@ -771,47 +594,89 @@ let addSubItemToAnItem = (req, res) => {
     let updateItem = (ItemDetails) => {
         console.log(req.body)
         return new Promise((resolve, reject) => {
-
-            let subOptions = {
-                subItemId: shortid.generate(),
-                subItemName: req.body.subItemName,
-                subItemDone: req.body.subItemDone,
-                subItemCreatorId: req.body.subItemCreatorId,
-                subItemCreatorName: req.body.subItemCreatorName,
-                subItemModifierId: req.body.subItemModifierId,
-                subItemModifierName: req.body.subItemModifierName,
-                subItemDone: req.body.subItemDone,
-                subItemCreatedOn: time.now(),
-                subItemModifiedOn: time.now(),
-            }
-            let options = {
-                $push: {
-                    subItems: {
-                        $each: [subOptions]
+            if (req.body.historyToken == 'false') {
+                let subOptions = {
+                    subItemId: shortid.generate(),
+                    subItemName: req.body.subItemName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatorId: req.body.subItemCreatorId,
+                    subItemCreatorName: req.body.subItemCreatorName,
+                    subItemModifierId: req.body.subItemModifierId,
+                    subItemModifierName: req.body.subItemModifierName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatedOn: time.now(),
+                    subItemModifiedOn: time.now(),
+                }
+                let options = {
+                    $push: {
+                        subItems: {
+                            $each: [subOptions]
+                        }
                     }
                 }
-            }
-            options.itemModifiedOn = time.now()
-            options.itemModifierId = req.body.subItemModifierId,
-                options.itemModifierName = req.body.subItemModifierName
-            console.log(subOptions)
-            ItemModel.update({ itemId: ItemDetails.itemId }, options).exec((err, result) => {
-                if (err) {
-                    console.log(err)
-                    logger.error(err.message, 'itemController: updateSubItem', 10)
-                    let apiResponse = response.generate(true, 'Failed To Update Item details : Sub Item Adding', 500, null)
-                    reject(apiResponse)
-                } else if (check.isEmpty(result)) {
-                    logger.info('No Item Found', 'itemController: updateSubItem')
-                    let apiResponse = response.generate(true, 'No Item Found', 404, null)
-                    reject(apiResponse)
-                } else {
+                options.itemModifiedOn = time.now()
+                options.itemModifierId = req.body.subItemModifierId,
+                    options.itemModifierName = req.body.subItemModifierName
+                console.log(subOptions)
+                ItemModel.update({ itemId: ItemDetails.itemId }, options).exec((err, result) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: updateSubItem', 10)
+                        let apiResponse = response.generate(true, 'Failed To Update Item details : Sub Item Adding', 500, null)
+                        reject(apiResponse)
+                    } else if (check.isEmpty(result)) {
+                        logger.info('No Item Found', 'itemController: updateSubItem')
+                        let apiResponse = response.generate(true, 'No Item Found', 404, null)
+                        reject(apiResponse)
+                    } else {
 
-                    let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
-                    eventEmitter.emit("new-subItem-created", subOptions);
-                    resolve(apiResponse)
+                        let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
+                        eventEmitter.emit("new-subItem-created", subOptions);
+                        resolve(apiResponse)
+                    }
+                }); // end of Item model update
+            } else {
+                let subOptions = {
+                    subItemId: req.body.subItemId,
+                    subItemName: req.body.subItemName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatorId: req.body.subItemCreatorId,
+                    subItemCreatorName: req.body.subItemCreatorName,
+                    subItemModifierId: req.body.subItemModifierId,
+                    subItemModifierName: req.body.subItemModifierName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatedOn: req.body.subItemCreatedOn,
+                    subItemModifiedOn: req.body.subItemModifiedOn,
                 }
-            }); // end of Item model update
+                let options = {
+                    $push: {
+                        subItems: {
+                            $each: [subOptions]
+                        }
+                    }
+                }
+                options.itemModifiedOn = req.body.itemModifiedOn
+                options.itemModifierId = req.body.subItemModifierId,
+                    options.itemModifierName = req.body.subItemModifierName
+                console.log(subOptions)
+                ItemModel.update({ itemId: ItemDetails.itemId }, options).exec((err, result) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: updateSubItem', 10)
+                        let apiResponse = response.generate(true, 'Failed To Update Item details : Sub Item Adding', 500, null)
+                        reject(apiResponse)
+                    } else if (check.isEmpty(result)) {
+                        logger.info('No Item Found', 'itemController: updateSubItem')
+                        let apiResponse = response.generate(true, 'No Item Found', 404, null)
+                        reject(apiResponse)
+                    } else {
+
+                        let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
+                        //eventEmitter.emit("new-subItem-created", subOptions);
+                        resolve(apiResponse)
+                    }
+                }); // end of Item model update
+            }
 
         })
     } // end updateItem function
@@ -884,76 +749,32 @@ let deleteSubItemOfAnItem = (req, res) => {
                         reject(apiResponse)
                     } else {
                         //let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
+                        if (req.body.historyToken == 'false') {
+                            ListModel.find({ listId: ItemDetails.listId })
+                                .exec((err, listDetails) => {
+                                    if (err) {
+                                        console.log(err)
+                                        logger.error(err.message, 'itemController: findList :- OnDeletingSubitem', 10)
+                                        let apiResponse = response.generate(true, 'Db error', 500, null)
+                                        reject(apiResponse)
+                                    } else if (check.isEmpty(listDetails)) {
+                                        logger.info('No List Found', 'itemController: findList :- OnDeletingSubitem')
+                                    } else {
+                                        console.log("list details here is:", listDetails)
 
-                        ListModel.find({ listId: ItemDetails.listId })
-                            .exec((err, listDetails) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'itemController: findList :- OnDeletingSubitem', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-                                } else if (check.isEmpty(listDetails)) {
-                                    logger.info('No List Found', 'itemController: findList :- OnDeletingSubitem')
-                                } else {
-                                    console.log("list details here is:", listDetails)
-
-                                    let friendId = [];
-
-                                    friendId.push(listDetails.listCreatorId);
-
-                                    UserModel.find({ userId: listDetails.listCreatorId })
-                                        .select('friends')
-                                        .lean()
-                                        .exec((err, result) => {
-                                            if (err) {
-                                                console.log(err)
-                                                logger.error(err.message, 'itemController: getAllFriend :- OnDeletingSubitem', 10)
-                                                let apiResponse = response.generate(true, 'Db error', 500, null)
-                                                reject(apiResponse)
-
-                                            } else if (check.isEmpty(result)) {
-                                                logger.info('No Friend Found', 'itemController: getAllFriend :- OnDeletingSubitem')
-
-                                            } else {
-
-                                                console.log("length of friend list of user here is:", result.length)
-                                                const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                                    .map(friendId => {
-                                                        return {
-                                                            friendId: friendId
-                                                        };
-                                                    });
-                                                console.log("friend list of user here is:", friendResult)
-                                                friendId.push(friendResult);
-
-                                            }
-                                        })
-
-                                    let newHistory = new HistoryModel({
-                                        actionPerformedOn: 'subItem-delete',
-                                        objectToRestore: ItemDetails,
-                                        //listId: ItemDetails.listId,
-                                        itemId: req.params.itemId,
-                                        userFriendsId: friendId,
-                                        storedTime: time.now()
-                                    })
-
-                                    console.log("details to be saved in history before deleting subItem to an item", newHistory);
-
-                                    newHistory.save((err, newHistory) => {
-                                        if (err) {
-                                            console.log(err)
-                                            logger.error(err.message, 'itemController: saveHistory :- onSubitem delete', 10)
-                                            let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                            reject(apiResponse)
-                                        } else {
-                                            console.log("data saved to history", newHistory);
-                                            logger.info("data saved to history", 'itemController: saveHistory :- onSubItem delete')
+                                        let newHistoryObj = {
+                                            actionPerformedOn: 'subItem-delete',
+                                            objectToRestore: ItemDetails,
+                                            listId: ItemDetails.listId,
+                                            itemId: req.params.itemId,
+                                            listCreatorUserId: listDetails.listCreatorId,
+                                            storedTime: time.now()
                                         }
-                                    })
+                                        historyController.addHistoryObjOnSubItemDelete(newHistoryObj);
+                                    }
+                                })
+                        }
 
-                                }
-                            })
 
                         resolve(ItemDetails)
                     }
@@ -967,10 +788,6 @@ let deleteSubItemOfAnItem = (req, res) => {
             let options = {
                 $pull: {
                     subItems: {
-                        //$each: [req.body.subItemId]
-                        // $elemMatch:{
-                        //     subItemId: req.body.subItemId
-                        // }
                         subItemId: req.body.subItemId
 
                     }
@@ -1073,76 +890,32 @@ let editSubItem = (req, res) => {
                         reject(apiResponse)
                     } else {
                         //let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
+                        if (req.body.historyToken == 'false') {
+                            ListModel.find({ listId: ItemDetails.listId })
+                                .exec((err, listDetails) => {
+                                    if (err) {
+                                        console.log(err)
+                                        logger.error(err.message, 'itemController: findList :- OnEditingSubitem', 10)
+                                        let apiResponse = response.generate(true, 'Db error', 500, null)
+                                        reject(apiResponse)
+                                    } else if (check.isEmpty(listDetails)) {
+                                        logger.info('No List Found', 'itemController: findList :- OnEditingSubitem')
+                                    } else {
+                                        console.log("list details here is:", listDetails)
 
-                        ListModel.find({ listId: ItemDetails.listId })
-                            .exec((err, listDetails) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'itemController: findList :- OnEditingSubitem', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-                                } else if (check.isEmpty(listDetails)) {
-                                    logger.info('No List Found', 'itemController: findList :- OnEditingSubitem')
-                                } else {
-                                    console.log("list details here is:", listDetails)
-
-                                    let friendId = [];
-
-                                    friendId.push(listDetails.listCreatorId);
-
-                                    UserModel.find({ userId: listDetails.listCreatorId })
-                                        .select('friends')
-                                        .lean()
-                                        .exec((err, result) => {
-                                            if (err) {
-                                                console.log(err)
-                                                logger.error(err.message, 'itemController: getAllFriend :- OnEditingSubitem', 10)
-                                                let apiResponse = response.generate(true, 'Db error', 500, null)
-                                                reject(apiResponse)
-
-                                            } else if (check.isEmpty(result)) {
-                                                logger.info('No Friend Found', 'itemController: getAllFriend :- OnEditingSubitem')
-
-                                            } else {
-
-                                                console.log("length of friend list of user here is:", result.length)
-                                                const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                                    .map(friendId => {
-                                                        return {
-                                                            friendId: friendId
-                                                        };
-                                                    });
-                                                console.log("friend list of user here is:", friendResult)
-                                                friendId.push(friendResult);
-
-                                            }
-                                        })
-
-                                    let newHistory = new HistoryModel({
-                                        actionPerformedOn: 'subItem-edit',
-                                        objectToRestore: ItemDetails,
-                                        //listId: ItemDetails.listId,
-                                        itemId: req.params.itemId,
-                                        userFriendsId: friendId,
-                                        storedTime: time.now()
-                                    })
-
-                                    console.log("details to be saved in history before editing subItem to an item", newHistory);
-
-                                    newHistory.save((err, newHistory) => {
-                                        if (err) {
-                                            console.log(err)
-                                            logger.error(err.message, 'itemController: saveHistory :- onSubitem edit', 10)
-                                            let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                            reject(apiResponse)
-                                        } else {
-                                            console.log("data saved to history", newHistory);
-                                            logger.info("data saved to history", 'itemController: saveHistory :- onSubItem edit')
+                                        let newHistoryObj = {
+                                            actionPerformedOn: 'subItem-edit',
+                                            objectToRestore: ItemDetails,
+                                            listId: ItemDetails.listId,
+                                            itemId: req.params.itemId,
+                                            listCreatorUserId: listDetails.listCreatorId,
+                                            storedTime: time.now()
                                         }
-                                    })
+                                        historyController.addHistoryObjOnSubItemEdit(newHistoryObj);
+                                    }
+                                })
+                        }
 
-                                }
-                            })
 
                         resolve(ItemDetails)
                     }
@@ -1160,13 +933,7 @@ let editSubItem = (req, res) => {
                     "subItems.$.subItemModifierName": req.body.subItemModifierName,
                     "subItems.$.subItemDone": req.body.subItemDone,
                     "subItems.$.subItemModifiedOn": time.now(),
-                    // subItems: {
-                    //     subItemName: req.body.subItemName,
-                    //     subItemModifierId: req.body.subItemModifierId,
-                    //     subItemModifierName: req.body.subItemModifierName,
-                    //     subItemDone: req.body.subItemDone,
-                    //     subItemModifiedOn: time.now()
-                    // }
+
                 }
             }
             options.itemModifiedOn = time.now()

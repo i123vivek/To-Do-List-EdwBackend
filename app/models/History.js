@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 Schema = mongoose.Schema;
 
 let historySchema = new Schema({
+    historyId: {
+        type: String,
+        default: '',
+        index: true,
+        unique: true
+    },
     actionPerformedOn: {
         type: String,
         default: ''
@@ -18,8 +24,8 @@ let historySchema = new Schema({
         type: String,
         default: ''
     },
-    userFriendsId: {
-        type: [String],
+    listCreatorUserId: {
+        type: String,
         default: ''
     },
     storedTime: {

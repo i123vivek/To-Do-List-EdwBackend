@@ -190,64 +190,20 @@ let deleteList = (req, res) => {
                         let apiResponse = response.generate(true, 'No List Found', 404, null)
                         reject(apiResponse)
                     } else {
-
-                        let friendId = [];
-
-                        friendId.push(listDetails.listCreatorId);
-
-                        UserModel.find({ userId: listDetails.listCreatorId })
-                            .select('friends')
-                            .lean()
-                            .exec((err, result) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'listController: getAllFriend', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-
-                                } else if (check.isEmpty(result)) {
-                                    logger.info('No Friend Found', 'listController: getAllFriend')
-
-                                } else {
-
-                                    console.log(" length of friend list here is:", result.length)
-                                    const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                        .map(friendId => {
-                                            return {
-                                                friendId: friendId
-                                            };
-                                        });
-                                    console.log("friend list of user here is:", friendResult)
-                                    friendId.push(friendResult);
-
-                                }
-                            })
-
-
-
-                        let newHistory = new HistoryModel({
-                            actionPerformedOn: 'list-delete',
-                            objectToRestore: listDetails,
-                            listId: req.params.listId,
-                            userFriendsId: friendId,
-                            storedTime: time.now()
-                        })
-
-                        console.log("details to be saved in history before deleting list", newHistory);
-
-                        newHistory.save((err, newHistory) => {
-                            if (err) {
-                                console.log(err)
-                                logger.error(err.message, 'listController: saveHistory -> on listdelete', 10)
-                                let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                reject(apiResponse)
-                            } else {
-                                console.log("data saved to history", newHistory);
-                                logger.info("data saved to history", 'listController: saveHistory -> on listdelete')
+                        if (req.body.historyToken == 'false') {
+                            let newHistoryObj = {
+                                actionPerformedOn: 'list-delete',
+                                objectToRestore: listDetails,
+                                listId: req.params.listId,
+                                listCreatorUserId: listDetails.listCreatorId,
+                                storedTime: time.now()
                             }
-                        })
 
-                        resolve(listDetails)
+                            historyController.addHistoryObjOnListDelete(newHistoryObj);
+                        }
+
+                        resolve(listDetails);
+
                     }
                 })
         })
@@ -292,23 +248,8 @@ let deleteList = (req, res) => {
 } // end deleteList Function .
 
 eventEmitter.on("list-deleted", (listDetail) => {
-    //ListModel.findOne({ listId: listDetail })
-    //.select()
-
-    //.exec((err, ListDetails) => {
-    // if (err) {
-    //     console.log(err)
-    //     logger.error(err.message, 'listController: eventEmitter.on -> list-deleted', 10)
-
-    // } else if (check.isEmpty(ListDetails)) {
-    //     logger.info('No List Found', 'listController: eventEmitter.on -> list-deleted')
-
-    // } else {
-    //     logger.info('list found','listController: eventEmitter.on -> list-deleted')
 
     notificationController.createANewNotificationObjOnListDelete(listDetail);
-    //     }
-    // })
 })
 
 
@@ -330,65 +271,17 @@ let editList = (req, res) => {
                         let apiResponse = response.generate(true, 'No List Found', 404, null)
                         reject(apiResponse)
                     } else {
-                        //let apiResponse = response.generate(false, 'List Details Found', 200, ListDetails)
-
-                        let friendId = [];
-
-                        friendId.push(ListDetails.listCreatorId);
-
-                        UserModel.find({ userId: ListDetails.listCreatorId })
-                            .select('friends')
-                            .lean()
-                            .exec((err, result) => {
-                                if (err) {
-                                    console.log(err)
-                                    logger.error(err.message, 'listController: getAllFriend', 10)
-                                    let apiResponse = response.generate(true, 'Db error', 500, null)
-                                    reject(apiResponse)
-
-                                } else if (check.isEmpty(result)) {
-                                    logger.info('No Friend Found', 'listController: getAllFriend')
-
-                                } else {
-
-                                    console.log("length of friend list of user here is:", result.length)
-                                    const friendResult = Array.from(new Set(result[0].friends.map(x => x.friendId)))
-                                        .map(friendId => {
-                                            return {
-                                                friendId: friendId
-                                            };
-                                        });
-                                    console.log("friend list of user here is:", friendResult)
-                                    friendId.push(friendResult);
-
-                                }
-                            })
-
-
-
-                        let newHistory = new HistoryModel({
-                            actionPerformedOn: 'list-edit',
-                            objectToRestore: ListDetails,
-                            listId: req.params.listId,
-                            userFriendsId: friendId,
-                            storedTime: time.now()
-                        })
-
-                        console.log("details to be saved in history before editing list", newHistory);
-
-                        newHistory.save((err, newHistory) => {
-                            if (err) {
-                                console.log(err)
-                                logger.error(err.message, 'listController: saveHistory -> OnListEdit', 10)
-                                let apiResponse = response.generate(true, 'Failed to save history details', 500, null)
-                                reject(apiResponse)
-                            } else {
-                                console.log("data saved to history", newHistory);
-                                logger.info("data saved to history", 'listController: saveHistory-> OnListEdit')
+                        if (req.body.historyToken == 'false') {
+                            let newHistoryObj = {
+                                actionPerformedOn: 'list-edit',
+                                objectToRestore: ListDetails,
+                                listId: req.params.listId,
+                                listCreatorUserId: ListDetails.listCreatorId,
+                                storedTime: time.now()
                             }
-                        })
-
-                        resolve(ListDetails)
+                            historyController.addHistoryObjOnListEdit(newHistoryObj);
+                        }
+                        resolve(ListDetails);
                     }
                 })
         })
@@ -477,33 +370,64 @@ let createList = (req, res) => {
 
     let addList = () => {
         return new Promise((resolve, reject) => {
+            if (req.body.historyToken == 'false') {
+                let newList = new ListModel({
+                    listId: shortid.generate(),
+                    listName: req.body.listName,
+                    listCreatorId: req.body.listCreatorId,
+                    listCreatorName: req.body.listCreatorName,
+                    listModifierId: req.body.listModifierId,
+                    listModifierName: req.body.listModifierName,
+                    listCreatedOn: time.now(),
+                    listModifiedOn: time.now(),
+                })
 
-            let newList = new ListModel({
-                listId: shortid.generate(),
-                listName: req.body.listName,
-                listCreatorId: req.body.listCreatorId,
-                listCreatorName: req.body.listCreatorName,
-                listModifierId: req.body.listModifierId,
-                listModifierName: req.body.listModifierName,
-                listCreatedOn: time.now(),
-                listModifiedOn: time.now(),
-            })
+                console.log(newList)
+                newList.save((err, newList) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'listController: addList', 10)
+                        let apiResponse = response.generate(true, 'Failed to create new List', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newListObj = newList.toObject();
+                        eventEmitter.emit("new-list-created", newListObj);
+                        delete newListObj._id
+                        delete newListObj.__v
+                        resolve(newListObj)
+                    }
+                })
+            } else {
+                let newList = new ListModel({
+                    listId: req.body.listId,
+                    listName: req.body.listName,
+                    listCreatorId: req.body.listCreatorId,
+                    listCreatorName: req.body.listCreatorName,
+                    listModifierId: req.body.listModifierId,
+                    listModifierName: req.body.listModifierName,
+                    listCreatedOn: req.body.listCreatedOn,
+                    listModifiedOn: req.body.listModifiedOn,
+                })
 
-            console.log(newList)
-            newList.save((err, newList) => {
-                if (err) {
-                    console.log(err)
-                    logger.error(err.message, 'listController: addList', 10)
-                    let apiResponse = response.generate(true, 'Failed to create new List', 500, null)
-                    reject(apiResponse)
-                } else {
-                    let newListObj = newList.toObject();
-                    eventEmitter.emit("new-list-created", newListObj);
-                    delete newListObj._id
-                    delete newListObj.__v
-                    resolve(newListObj)
-                }
-            })
+                console.log(newList)
+                newList.save((err, newList) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'listController: addList', 10)
+                        let apiResponse = response.generate(true, 'Failed to create new List', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newListObj = newList.toObject();
+                        //eventEmitter.emit("new-list-created", newListObj);
+                        delete newListObj._id
+                        delete newListObj.__v
+                        resolve(newListObj)
+                    }
+                })
+            }
+
+
+
 
         })
     }// end addList function
@@ -522,11 +446,15 @@ let createList = (req, res) => {
 
 } // end of createList Function. 
 
+
 eventEmitter.on("new-list-created", (listData) => {
 
     notificationController.createNewNotificationListObj(listData)
 
 })
+
+
+
 
 
 module.exports = {
