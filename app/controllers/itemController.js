@@ -389,7 +389,36 @@ let addItemToAList = (req, res) => {
     let addItem = () => {
         return new Promise((resolve, reject) => {
 
-            if (req.body.historyToken == 'false') {
+            if (req.body.historyToken == 'true') {
+                let newItem = new ItemModel({
+                    itemId: req.body.itemId,
+                    listId: req.body.listId,
+                    itemName: req.body.itemName,
+                    itemCreatorId: req.body.itemCreatorId,
+                    itemCreatorName: req.body.itemCreatorName,
+                    itemModifierId: req.body.itemModifierId,
+                    itemModifierName: req.body.itemModifierName,
+                    itemDone: req.body.itemDone,
+                    itemCreatedOn: req.body.itemCreatedOn,
+                    itemModifiedOn: req.body.itemModifiedOn,
+                })
+
+                console.log(newItem);
+
+                newItem.save((err, newItem) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: addItem', 10)
+                        let apiResponse = response.generate(true, 'Failed to add new Item', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newItemObj = newItem.toObject();
+                        //eventEmitter.emit("new-item-created", newItemObj);
+                        resolve(newItemObj)
+                    }
+                })
+            }
+            else {
                 let newItem = new ItemModel({
                     itemId: shortid.generate(),
                     listId: req.body.listId,
@@ -418,34 +447,6 @@ let addItemToAList = (req, res) => {
                     }
                 })
 
-            } else {
-                let newItem = new ItemModel({
-                    itemId: req.body.itemId,
-                    listId: req.body.listId,
-                    itemName: req.body.itemName,
-                    itemCreatorId: req.body.itemCreatorId,
-                    itemCreatorName: req.body.itemCreatorName,
-                    itemModifierId: req.body.itemModifierId,
-                    itemModifierName: req.body.itemModifierName,
-                    itemDone: req.body.itemDone,
-                    itemCreatedOn: req.body.itemCreatedOn,
-                    itemModifiedOn: req.body.itemModifiedOn,
-                })
-
-                console.log(newItem);
-
-                newItem.save((err, newItem) => {
-                    if (err) {
-                        console.log(err)
-                        logger.error(err.message, 'itemController: addItem', 10)
-                        let apiResponse = response.generate(true, 'Failed to add new Item', 500, null)
-                        reject(apiResponse)
-                    } else {
-                        let newItemObj = newItem.toObject();
-                        //eventEmitter.emit("new-item-created", newItemObj);
-                        resolve(newItemObj)
-                    }
-                })
             }
 
         })
@@ -594,48 +595,8 @@ let addSubItemToAnItem = (req, res) => {
     let updateItem = (ItemDetails) => {
         console.log(req.body)
         return new Promise((resolve, reject) => {
-            if (req.body.historyToken == 'false') {
-                let subOptions = {
-                    subItemId: shortid.generate(),
-                    subItemName: req.body.subItemName,
-                    subItemDone: req.body.subItemDone,
-                    subItemCreatorId: req.body.subItemCreatorId,
-                    subItemCreatorName: req.body.subItemCreatorName,
-                    subItemModifierId: req.body.subItemModifierId,
-                    subItemModifierName: req.body.subItemModifierName,
-                    subItemDone: req.body.subItemDone,
-                    subItemCreatedOn: time.now(),
-                    subItemModifiedOn: time.now(),
-                }
-                let options = {
-                    $push: {
-                        subItems: {
-                            $each: [subOptions]
-                        }
-                    }
-                }
-                options.itemModifiedOn = time.now()
-                options.itemModifierId = req.body.subItemModifierId,
-                    options.itemModifierName = req.body.subItemModifierName
-                console.log(subOptions)
-                ItemModel.update({ itemId: ItemDetails.itemId }, options).exec((err, result) => {
-                    if (err) {
-                        console.log(err)
-                        logger.error(err.message, 'itemController: updateSubItem', 10)
-                        let apiResponse = response.generate(true, 'Failed To Update Item details : Sub Item Adding', 500, null)
-                        reject(apiResponse)
-                    } else if (check.isEmpty(result)) {
-                        logger.info('No Item Found', 'itemController: updateSubItem')
-                        let apiResponse = response.generate(true, 'No Item Found', 404, null)
-                        reject(apiResponse)
-                    } else {
 
-                        let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
-                        eventEmitter.emit("new-subItem-created", subOptions);
-                        resolve(apiResponse)
-                    }
-                }); // end of Item model update
-            } else {
+            if (req.body.historyToken == 'true') {
                 let subOptions = {
                     subItemId: req.body.subItemId,
                     subItemName: req.body.subItemName,
@@ -673,6 +634,48 @@ let addSubItemToAnItem = (req, res) => {
 
                         let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
                         //eventEmitter.emit("new-subItem-created", subOptions);
+                        resolve(apiResponse)
+                    }
+                }); // end of Item model update
+            }
+            else {
+                let subOptions = {
+                    subItemId: shortid.generate(),
+                    subItemName: req.body.subItemName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatorId: req.body.subItemCreatorId,
+                    subItemCreatorName: req.body.subItemCreatorName,
+                    subItemModifierId: req.body.subItemModifierId,
+                    subItemModifierName: req.body.subItemModifierName,
+                    subItemDone: req.body.subItemDone,
+                    subItemCreatedOn: time.now(),
+                    subItemModifiedOn: time.now(),
+                }
+                let options = {
+                    $push: {
+                        subItems: {
+                            $each: [subOptions]
+                        }
+                    }
+                }
+                options.itemModifiedOn = time.now()
+                options.itemModifierId = req.body.subItemModifierId,
+                    options.itemModifierName = req.body.subItemModifierName
+                console.log(subOptions)
+                ItemModel.update({ itemId: ItemDetails.itemId }, options).exec((err, result) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'itemController: updateSubItem', 10)
+                        let apiResponse = response.generate(true, 'Failed To Update Item details : Sub Item Adding', 500, null)
+                        reject(apiResponse)
+                    } else if (check.isEmpty(result)) {
+                        logger.info('No Item Found', 'itemController: updateSubItem')
+                        let apiResponse = response.generate(true, 'No Item Found', 404, null)
+                        reject(apiResponse)
+                    } else {
+
+                        let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
+                        eventEmitter.emit("new-subItem-created", subOptions);
                         resolve(apiResponse)
                     }
                 }); // end of Item model update

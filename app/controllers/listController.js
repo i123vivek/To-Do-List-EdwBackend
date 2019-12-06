@@ -370,34 +370,7 @@ let createList = (req, res) => {
 
     let addList = () => {
         return new Promise((resolve, reject) => {
-            if (req.body.historyToken == 'false') {
-                let newList = new ListModel({
-                    listId: shortid.generate(),
-                    listName: req.body.listName,
-                    listCreatorId: req.body.listCreatorId,
-                    listCreatorName: req.body.listCreatorName,
-                    listModifierId: req.body.listModifierId,
-                    listModifierName: req.body.listModifierName,
-                    listCreatedOn: time.now(),
-                    listModifiedOn: time.now(),
-                })
-
-                console.log(newList)
-                newList.save((err, newList) => {
-                    if (err) {
-                        console.log(err)
-                        logger.error(err.message, 'listController: addList', 10)
-                        let apiResponse = response.generate(true, 'Failed to create new List', 500, null)
-                        reject(apiResponse)
-                    } else {
-                        let newListObj = newList.toObject();
-                        eventEmitter.emit("new-list-created", newListObj);
-                        delete newListObj._id
-                        delete newListObj.__v
-                        resolve(newListObj)
-                    }
-                })
-            } else {
+            if (req.body.historyToken == 'true') {
                 let newList = new ListModel({
                     listId: req.body.listId,
                     listName: req.body.listName,
@@ -419,6 +392,34 @@ let createList = (req, res) => {
                     } else {
                         let newListObj = newList.toObject();
                         //eventEmitter.emit("new-list-created", newListObj);
+                        delete newListObj._id
+                        delete newListObj.__v
+                        resolve(newListObj)
+                    }
+                })
+            }
+            else {
+                let newList = new ListModel({
+                    listId: shortid.generate(),
+                    listName: req.body.listName,
+                    listCreatorId: req.body.listCreatorId,
+                    listCreatorName: req.body.listCreatorName,
+                    listModifierId: req.body.listModifierId,
+                    listModifierName: req.body.listModifierName,
+                    listCreatedOn: time.now(),
+                    listModifiedOn: time.now(),
+                })
+
+                console.log(newList)
+                newList.save((err, newList) => {
+                    if (err) {
+                        console.log(err)
+                        logger.error(err.message, 'listController: addList', 10)
+                        let apiResponse = response.generate(true, 'Failed to create new List', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        let newListObj = newList.toObject();
+                        eventEmitter.emit("new-list-created", newListObj);
                         delete newListObj._id
                         delete newListObj.__v
                         resolve(newListObj)

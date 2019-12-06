@@ -74,7 +74,7 @@ let setServer = (server) => {
                 eventEmitter.emit('save-on-send-friend-request', data);
 
             }, 1000)
-            myIo.emit(data.recieverId, data);
+            //myIo.emit(data.recieverId, data);
         })
 
 
@@ -85,7 +85,7 @@ let setServer = (server) => {
                 eventEmitter.emit('save-on-cancel-friend-request', data);
 
             }, 1000)
-            myIo.emit(data.recieverId, data);
+           // myIo.emit(data.recieverId, data);
         })
 
         socket.on('reject-friend-request', (data) => {
@@ -95,7 +95,7 @@ let setServer = (server) => {
                 eventEmitter.emit('save-on-reject-friend-request', data);
 
             }, 1000)
-            myIo.emit(data.senderId, data);
+            //myIo.emit(data.senderId, data);
         })
 
         socket.on('accept-friend-request', (data) => {
@@ -105,7 +105,7 @@ let setServer = (server) => {
                 eventEmitter.emit('save-on-accept-friend-request', data);
 
             }, 1000)
-            myIo.emit(data.senderId, data);
+            //myIo.emit(data.senderId, data);
         })
 
         // function to send notification.
@@ -301,6 +301,11 @@ eventEmitter.on('save-on-accept-friend-request', (data) => {
             friends: {
                 $each: [subOptions]
             }
+        },
+        $pull: {
+            friendRequestSent: {
+                friendId: data.recieverId
+            }
         }
     }
 
@@ -324,6 +329,11 @@ eventEmitter.on('save-on-accept-friend-request', (data) => {
         $push: {
             friends: {
                 $each: [recSubOptions]
+            }
+        },
+        $pull: {
+            friendRequestRecieved: {
+                friendId: data.senderId
             }
         }
     }
