@@ -8,6 +8,7 @@ const time = require('../libs/timeLib');
 
 /* Models */
 const HistoryModel = mongoose.model('History')
+const UserModel = mongoose.model('User')
 const ItemModel = mongoose.model('Item')
 const ListModel = mongoose.model('List')
 
@@ -23,7 +24,7 @@ let addHistoryObjOnListDelete = (historyObj) => {
                 objectToRestore: historyObj.objectToRestore,
                 listId: historyObj.listId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -52,7 +53,7 @@ let addHistoryObjOnListEdit = (historyObj) => {
                 objectToRestore: historyObj.objectToRestore,
                 listId: historyObj.listId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -82,7 +83,7 @@ let addHistoryObjOnItemDelete = (historyObj) => {
                 itemId: historyObj.itemId,
                 listId: historyObj.listId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -112,7 +113,7 @@ let addHistoryObjOnItemEdit = (historyObj) => {
                 listId: historyObj.listId,
                 itemId: historyObj.itemId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -143,7 +144,7 @@ let addHistoryObjOnSubItemAdd = (historyObj) => {
                 listId: historyObj.listId,
                 itemId: historyObj.itemId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -174,7 +175,7 @@ let addHistoryObjOnSubItemDelete = (historyObj) => {
                 itemId: historyObj.itemId,
                 listId: historyObj.listId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {
@@ -205,7 +206,7 @@ let addHistoryObjOnSubItemEdit = (historyObj) => {
                 listId: historyObj.listId,
                 itemId: historyObj.itemId,
                 listCreatorUserId: historyObj.listCreatorUserId,
-                storedTime: historyObj.sortedTime
+                storedTime: time.now()
             })
 
             newHistoryObj.save((err, result) => {

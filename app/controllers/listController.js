@@ -196,7 +196,7 @@ let deleteList = (req, res) => {
                                 objectToRestore: listDetails,
                                 listId: req.params.listId,
                                 listCreatorUserId: listDetails.listCreatorId,
-                                storedTime: time.now()
+                                //storedTime: time.now()
                             }
 
                             historyController.addHistoryObjOnListDelete(newHistoryObj);
@@ -277,7 +277,7 @@ let editList = (req, res) => {
                                 objectToRestore: ListDetails,
                                 listId: req.params.listId,
                                 listCreatorUserId: ListDetails.listCreatorId,
-                                storedTime: time.now()
+                                //storedTime: time.now()
                             }
                             historyController.addHistoryObjOnListEdit(newHistoryObj);
                         }

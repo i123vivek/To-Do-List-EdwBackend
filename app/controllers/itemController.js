@@ -11,6 +11,7 @@ const UserModel = mongoose.model('User');
 const HistoryModel = mongoose.model('History')
 
 const notificationController = require('./notificationController')
+const historyController = require('./historyController')
 const events = require('events');
 const eventEmitter = new events.EventEmitter();
 
@@ -136,8 +137,8 @@ let deleteItem = (req, res) => {
                                             objectToRestore: itemDetails,
                                             listId: itemDetails.listId,
                                             itemId: req.params.itemId,
-                                            listCreatorUserId: listDetails.listCreatorId,
-                                            storedTime: time.now()
+                                            listCreatorUserId: listDetails[0].listCreatorId,
+                                            //storedTime: time.now()
                                         }
 
                                         historyController.addHistoryObjOnItemDelete(newHistoryObj);
@@ -246,13 +247,15 @@ let updateItem = (req, res) => {
                                     } else if (check.isEmpty(listDetails)) {
                                         logger.info('No List Found', 'itemController: findList')
                                     } else {
+
+                                       //console.log("list creator id here is:",listDetails[listCreatorId])
                                         let newHistoryObj = {
                                             actionPerformedOn: 'item-edit',
                                             objectToRestore: itemDetails,
                                             listId: itemDetails.listId,
                                             itemId: req.params.itemId,
-                                            listCreatorUserId: listDetails.listCreatorId,
-                                            storedTime: time.now()
+                                            listCreatorUserId: listDetails[0].listCreatorId,
+                                            //storedTime: time.now()
                                         }
 
                                         historyController.addHistoryObjOnItemEdit(newHistoryObj);
@@ -576,8 +579,8 @@ let addSubItemToAnItem = (req, res) => {
                                             objectToRestore: ItemDetails,
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
-                                            listCreatorUserId: listDetails.listCreatorId,
-                                            storedTime: time.now()
+                                            listCreatorUserId: listDetails[0].listCreatorId,
+                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemAdd(newHistoryObj);
 
@@ -605,7 +608,7 @@ let addSubItemToAnItem = (req, res) => {
                     subItemCreatorName: req.body.subItemCreatorName,
                     subItemModifierId: req.body.subItemModifierId,
                     subItemModifierName: req.body.subItemModifierName,
-                    subItemDone: req.body.subItemDone,
+                    //subItemDone: req.body.subItemDone,
                     subItemCreatedOn: req.body.subItemCreatedOn,
                     subItemModifiedOn: req.body.subItemModifiedOn,
                 }
@@ -647,7 +650,7 @@ let addSubItemToAnItem = (req, res) => {
                     subItemCreatorName: req.body.subItemCreatorName,
                     subItemModifierId: req.body.subItemModifierId,
                     subItemModifierName: req.body.subItemModifierName,
-                    subItemDone: req.body.subItemDone,
+                    //subItemDone: req.body.subItemDone,
                     subItemCreatedOn: time.now(),
                     subItemModifiedOn: time.now(),
                 }
@@ -770,8 +773,8 @@ let deleteSubItemOfAnItem = (req, res) => {
                                             objectToRestore: ItemDetails,
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
-                                            listCreatorUserId: listDetails.listCreatorId,
-                                            storedTime: time.now()
+                                            listCreatorUserId: listDetails[0].listCreatorId,
+                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemDelete(newHistoryObj);
                                     }
@@ -911,8 +914,8 @@ let editSubItem = (req, res) => {
                                             objectToRestore: ItemDetails,
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
-                                            listCreatorUserId: listDetails.listCreatorId,
-                                            storedTime: time.now()
+                                            listCreatorUserId: listDetails[0].listCreatorId,
+                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemEdit(newHistoryObj);
                                     }
