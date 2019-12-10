@@ -83,8 +83,6 @@ let getAllList = (req, res) => {
 }// end getAllList Function .
 
 let getAllOtherLists = (req, res) => {
-    // let userIds = req.body.userId.split(',')
-    // console.log(userIds)
 
     let findUserDetails = () => {
         return new Promise((resolve, reject) => {
@@ -196,7 +194,6 @@ let deleteList = (req, res) => {
                                 objectToRestore: listDetails,
                                 listId: req.params.listId,
                                 listCreatorUserId: listDetails.listCreatorId,
-                                //storedTime: time.now()
                             }
 
                             historyController.addHistoryObjOnListDelete(newHistoryObj);
@@ -277,7 +274,6 @@ let editList = (req, res) => {
                                 objectToRestore: ListDetails,
                                 listId: req.params.listId,
                                 listCreatorUserId: ListDetails.listCreatorId,
-                                //storedTime: time.now()
                             }
                             historyController.addHistoryObjOnListEdit(newHistoryObj);
                         }
@@ -336,18 +332,11 @@ eventEmitter.on("list-edited", (listDetail) => {
             if (err) {
                 console.log(err)
                 logger.error(err.message, 'listController: eventEmitter.on -> list-edited', 10)
-                // let apiResponse = response.generate(true, 'Failed To Find List Details', 500, null)
-                // reject(apiResponse)
             } else if (check.isEmpty(ListDetails)) {
                 logger.info('No List Found', 'listController: eventEmitter.on -> list-edited')
-                // let apiResponse = response.generate(true, 'No List Found', 404, null)
-                // reject(apiResponse)
             } else {
                 logger.info('list found', 'listController: eventEmitter.on -> list-edited')
-                // let apiResponse = response.generate(false, 'List Details Found', 200, ListDetails)
-                // resolve(ListDetails)
                 notificationController.createANewNotificationObjOnListEdit(ListDetails);
-                //historyController.createANewHistoryObjOnListEdit(ListDetails);
             }
         })
 })
@@ -391,7 +380,6 @@ let createList = (req, res) => {
                         reject(apiResponse)
                     } else {
                         let newListObj = newList.toObject();
-                        //eventEmitter.emit("new-list-created", newListObj);
                         delete newListObj._id
                         delete newListObj.__v
                         resolve(newListObj)

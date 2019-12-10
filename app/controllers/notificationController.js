@@ -31,7 +31,6 @@ let createNewNotificationListObj = (listData) => {
             let apiResponse = response.generate(true, 'error while finding list details', 400, null)
             res.send(apiResponse)
         } else if (check.isEmpty(result)) {
-            //let peopleToSendNotification = 
             UserModel.findOne({ userId: listData.listCreatorId }, (error, userResult) => {
                 if (error) {
                     console.log(error);
@@ -176,7 +175,6 @@ let createANewNotificationObjOnItemCreate = (listData, itemData) => {
             let apiResponse = response.generate(true, 'error while finding list details', 400, null)
             res.send(apiResponse)
         } else if (check.isEmpty(result)) {
-            //let peopleToSendNotification = 
             UserModel.findOne({ userId: listData.listCreatorId }, (error, userResult) => {
                 if (error) {
                     console.log(error);
@@ -317,20 +315,19 @@ let createANewNotificationObjOnItemEdit = (listData, itemData) => {
     })
 }
 
-let createANewNotificationObjOnSubItemAdd = (listData, itemData, subOptions) =>{
+let createANewNotificationObjOnSubItemAdd = (listData, itemData, subOptions) => {
     console.log("list data for adding subItem to item is:", listData);
     console.log("item data for adding subItem to item is:", itemData);
     console.log("subItemId for adding subItem to item is:", subOptions.subItemId);
 
     let peopleToSendNotification = [];
-    NotificationModel.findOne({ notificationListId: itemData.listId, notificationItemId: itemData.itemId,notificationSubItemId : subOptions.subItemId,notificationPurpose: "subItem-Create" }, (err, result) => {
-        if (err){
+    NotificationModel.findOne({ notificationListId: itemData.listId, notificationItemId: itemData.itemId, notificationSubItemId: subOptions.subItemId, notificationPurpose: "subItem-Create" }, (err, result) => {
+        if (err) {
             console.log(err);
             logger.error(err.message, 'notificationController: createANewNotificationObjOnSubItemAdd', 10)
             let apiResponse = response.generate(true, 'errror while finding notification detail', 500, null)
             res.send(apiResponse)
         } else if (check.isEmpty(result)) {
-            //let peopleToSendNotification = 
             UserModel.findOne({ userId: listData.listCreatorId }, (error, userResult) => {
                 if (error) {
                     console.log(error);
@@ -479,17 +476,17 @@ let createANewNotificationObjOnSubItemEdit = (listData, itemData, subItemId, sub
 
 
 let markNotificationAsSeen = (req, res) => {
-    console.log("notification id is:",req.query.notificationId)
+    console.log("notification id is:", req.query.notificationId)
 
 
 
     let options = {
-        notificationStatus :"seen"
+        notificationStatus: "seen"
 
     }
 
 
-    NotificationModel.findOneAndUpdate({'notificationId': req.query.notificationId }, options).exec((err,result) =>{
+    NotificationModel.findOneAndUpdate({ 'notificationId': req.query.notificationId }, options).exec((err, result) => {
         if (err) {
             console.log(err)
             logger.error(err.message, 'notificationController: markAsSeen', 10)
@@ -501,8 +498,7 @@ let markNotificationAsSeen = (req, res) => {
             res.send(apiResponse)
         } else {
             console.log("Marked As Seen");
-            let apiResponse = response.generate(false,"Marked As Seen", 200, result)
-          // eventEmitter.emit("issue-edited", req.params.issueId);
+            let apiResponse = response.generate(false, "Marked As Seen", 200, result)
 
             res.send(apiResponse)
             console.log(result);
@@ -522,7 +518,7 @@ module.exports = {
     createANewNotificationObjOnItemDelete: createANewNotificationObjOnItemDelete,
     createANewNotificationObjOnItemEdit: createANewNotificationObjOnItemEdit,
 
-    createANewNotificationObjOnSubItemAdd : createANewNotificationObjOnSubItemAdd,
+    createANewNotificationObjOnSubItemAdd: createANewNotificationObjOnSubItemAdd,
     createANewNotificationObjOnSubItemDelete: createANewNotificationObjOnSubItemDelete,
     createANewNotificationObjOnSubItemEdit: createANewNotificationObjOnSubItemEdit,
 

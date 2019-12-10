@@ -337,7 +337,7 @@ let forgotPassword = (req, res) => {
                                         'Please click on the following link, or paste this into your browser to reset your password:\n\n' +
                                         'http://' + req.headers.host + '/reset/' + newUserObj.resetPasswordToken + '\n\n' +
                                         'If you did not request this, please ignore this email and your password will remain unchanged.\n';
-                                    let htmlMessage = '<a href=http://localhost:4200/' + 'reset/' + newUserObj.resetPasswordToken + '>' + "link" + '</a>'
+                                    let htmlMessage = '<a href=http://www.essindia.club/' + 'reset/' + newUserObj.resetPasswordToken + '>' + "link" + '</a>'
 
                                     let info = mailer.sendMail1(newUserObj.email, message, htmlMessage);
 

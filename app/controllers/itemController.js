@@ -212,8 +212,6 @@ eventEmitter.on("item-deleted", (itemDetail) => {
             }
         })
 
-    //notificationController.createANewNotificationObjOnListDelete(ListDetails);
-
 })
 
 
@@ -247,15 +245,12 @@ let updateItem = (req, res) => {
                                     } else if (check.isEmpty(listDetails)) {
                                         logger.info('No List Found', 'itemController: findList')
                                     } else {
-
-                                       //console.log("list creator id here is:",listDetails[listCreatorId])
                                         let newHistoryObj = {
                                             actionPerformedOn: 'item-edit',
                                             objectToRestore: itemDetails,
                                             listId: itemDetails.listId,
                                             itemId: req.params.itemId,
                                             listCreatorUserId: listDetails[0].listCreatorId,
-                                            //storedTime: time.now()
                                         }
 
                                         historyController.addHistoryObjOnItemEdit(newHistoryObj);
@@ -342,8 +337,6 @@ eventEmitter.on("item-edited", (itemId) => {
                             notificationController.createANewNotificationObjOnItemEdit(listDetail, itemDetail);
                         }
                     })
-
-                //notificationController.createANewNotificationObjOnListDelete(ListDetails);
             }
         })
 })
@@ -416,7 +409,6 @@ let addItemToAList = (req, res) => {
                         reject(apiResponse)
                     } else {
                         let newItemObj = newItem.toObject();
-                        //eventEmitter.emit("new-item-created", newItemObj);
                         resolve(newItemObj)
                     }
                 })
@@ -483,8 +475,6 @@ eventEmitter.on("new-item-created", (itemDetail) => {
             } else {
                 logger.info('list found', 'itemController: eventEmitter.on -> item-created')
 
-                //notificationController.createANewNotificationObjOnListEdit(ListDetails);
-
                 ItemModel.findOne({ itemId: itemDetail.itemId })
                     .select()
                     .exec((error, itemDetails) => {
@@ -532,7 +522,6 @@ let getSubItemDetails = (req, res) => {
 
 
     findSubItemDetails(req, res)
-        //.then(findSubItemDetails)
         .then((resolve) => {
             res.send(resolve)
         })
@@ -580,7 +569,6 @@ let addSubItemToAnItem = (req, res) => {
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
                                             listCreatorUserId: listDetails[0].listCreatorId,
-                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemAdd(newHistoryObj);
 
@@ -608,7 +596,6 @@ let addSubItemToAnItem = (req, res) => {
                     subItemCreatorName: req.body.subItemCreatorName,
                     subItemModifierId: req.body.subItemModifierId,
                     subItemModifierName: req.body.subItemModifierName,
-                    //subItemDone: req.body.subItemDone,
                     subItemCreatedOn: req.body.subItemCreatedOn,
                     subItemModifiedOn: req.body.subItemModifiedOn,
                 }
@@ -636,7 +623,6 @@ let addSubItemToAnItem = (req, res) => {
                     } else {
 
                         let apiResponse = response.generate(false, 'Item details Updated : Sub Item Added', 200, subOptions)
-                        //eventEmitter.emit("new-subItem-created", subOptions);
                         resolve(apiResponse)
                     }
                 }); // end of Item model update
@@ -650,7 +636,6 @@ let addSubItemToAnItem = (req, res) => {
                     subItemCreatorName: req.body.subItemCreatorName,
                     subItemModifierId: req.body.subItemModifierId,
                     subItemModifierName: req.body.subItemModifierName,
-                    //subItemDone: req.body.subItemDone,
                     subItemCreatedOn: time.now(),
                     subItemModifiedOn: time.now(),
                 }
@@ -730,8 +715,6 @@ eventEmitter.on("new-subItem-created", (subOptions) => {
                             notificationController.createANewNotificationObjOnSubItemAdd(listDetail, itemDetail, subOptions);
                         }
                     })
-
-                //notificationController.createANewNotificationObjOnListDelete(ListDetails);
             }
         })
 })
@@ -754,7 +737,6 @@ let deleteSubItemOfAnItem = (req, res) => {
                         let apiResponse = response.generate(true, 'No Item Found', 404, null)
                         reject(apiResponse)
                     } else {
-                        //let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
                         if (req.body.historyToken == 'false') {
                             ListModel.find({ listId: ItemDetails.listId })
                                 .exec((err, listDetails) => {
@@ -774,7 +756,6 @@ let deleteSubItemOfAnItem = (req, res) => {
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
                                             listCreatorUserId: listDetails[0].listCreatorId,
-                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemDelete(newHistoryObj);
                                     }
@@ -841,20 +822,7 @@ let deleteSubItemOfAnItem = (req, res) => {
 } // end of deleteSubItemOfAnItem  function
 
 eventEmitter.on("subItem-deleted", (options, ItemDetails) => {
-    //ItemModel.findOne({ 'subItems.subItemId' : subItemId })
-    //.select()
 
-    //.exec((err, itemDetail) => {
-    // if (err) {
-    //     console.log(err)
-    //     logger.error(err.message, 'itemController: eventEmitter.on -> subItem-deleted', 10)
-
-    // } else if (check.isEmpty(itemDetail)) {
-    //     logger.info('No Item Found', 'itemController: eventEmitter.on -> subItem-deleted')
-
-    // } else {
-    //     console.log("item details here is:", itemDetail)
-    //     logger.info('item found','itemController: eventEmitter.on -> subItem-deleted');
     ListModel.findOne({ listId: ItemDetails.listId })
         .select()
         .exec((err, listDetail) => {
@@ -870,10 +838,6 @@ eventEmitter.on("subItem-deleted", (options, ItemDetails) => {
                 notificationController.createANewNotificationObjOnSubItemDelete(listDetail, ItemDetails, options);
             }
         })
-
-    //notificationController.createANewNotificationObjOnListDelete(ListDetails);
-    //}
-    //})
 })
 
 
@@ -895,7 +859,6 @@ let editSubItem = (req, res) => {
                         let apiResponse = response.generate(true, 'No Item Found', 404, null)
                         reject(apiResponse)
                     } else {
-                        //let apiResponse = response.generate(false, 'Item Details Found', 200, ItemDetails)
                         if (req.body.historyToken == 'false') {
                             ListModel.find({ listId: ItemDetails.listId })
                                 .exec((err, listDetails) => {
@@ -915,7 +878,6 @@ let editSubItem = (req, res) => {
                                             listId: ItemDetails.listId,
                                             itemId: req.params.itemId,
                                             listCreatorUserId: listDetails[0].listCreatorId,
-                                            //storedTime: time.now()
                                         }
                                         historyController.addHistoryObjOnSubItemEdit(newHistoryObj);
                                     }
@@ -931,7 +893,6 @@ let editSubItem = (req, res) => {
 
     let updateItem = (ItemDetails) => {
         return new Promise((resolve, reject) => {
-            // .$
             let options = {
                 $set: {
                     "subItems.$.subItemName": req.body.subItemName,
@@ -1014,8 +975,6 @@ eventEmitter.on("subItem-edited", (subItemId, subItemName) => {
                             notificationController.createANewNotificationObjOnSubItemEdit(listDetail, itemDetail, subItemId, subItemName);
                         }
                     })
-
-                //notificationController.createANewNotificationObjOnListDelete(ListDetails);
             }
         })
 })

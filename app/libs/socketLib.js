@@ -85,7 +85,7 @@ let setServer = (server) => {
                 eventEmitter.emit('save-on-cancel-friend-request', data);
 
             }, 1000)
-           // myIo.emit(data.recieverId, data);
+            // myIo.emit(data.recieverId, data);
         })
 
         socket.on('reject-friend-request', (data) => {
