@@ -29,11 +29,6 @@ let getAllRequestSent = (req, res) => {
                 let apiResponse = response.generate(true, 'No Sent Request Found', 404, null)
                 res.send(apiResponse)
             } else {
-                // console.log("result of getallrequestsent :",result[0].friendRequestSent)
-                // let apiResponse = response.generate(false, 'All Sent Requests Found', 200, result)
-                // res.send(apiResponse)
-
-
                 const requestSentResult = Array.from(new Set(result[0].friendRequestSent.map(x => x.friendId)))
                     .map(friendId => {
                         return {
@@ -64,10 +59,6 @@ let getAllRequestRecieved = (req, res) => {
                 let apiResponse = response.generate(true, 'No Recieved Request Found', 404, null)
                 res.send(apiResponse)
             } else {
-                // console.log("result of getallrequestsent :",result[0].friendRequestRecieved)
-                // let apiResponse = response.generate(false, 'All Recieved Requests Found', 200, result)
-                // res.send(apiResponse)
-
                 const requestReceivedResult = Array.from(new Set(result[0].friendRequestRecieved.map(x => x.friendId)))
                     .map(friendId => {
                         return {
@@ -206,102 +197,6 @@ let sendFriendRequest = (req, res) => {
             res.send(err)
         })
 } // end of sending friend request function.
-
-
-
-// let sendFriendRequest = (data) => {
-//     let validateUserInput = () => {
-//         return new Promise((resolve, reject) => {
-//             if (data.senderId && data.senderName && data.recieverId && data.recieverName) {
-//                 resolve(data)
-//             } else {
-//                 logger.error('Field Missing During Sending request', 'friendController: sendFriendRequest', 5)
-//                 let apiResponse = response.generate(true, 'One or More Parameter(s) is missing', 400, null)
-//                 reject(apiResponse)
-//             }
-//         })
-//     }// end validate user input
-
-//     let updateSender = () => {
-//         let subOptions = {
-//             friendId: data.recieverId,
-//             friendName: data.recieverName,
-//         }
-
-//         let options = {
-//             $push: {
-//                 friendRequestSent: { $each: [subOptions] }
-//             }
-//         }
-
-//         return new Promise((resolve, reject) => {
-//             UserModel.updateOne({ userId: data.senderId }, options).exec((err, result) => {
-//                 if (err) {
-//                     console.log("Error in verifying", err)
-//                     logger.error(err.message, 'friendController:updateSender', 10)
-//                     let apiResponse = response.generate(true, 'Failed To Update Sender', 500, null)
-//                     reject(apiResponse)
-//                 } else if (check.isEmpty(result)) {
-//                     logger.info('Sender not Found', 'friendController: updateSender')
-//                     let apiResponse = response.generate(true, 'Sender not Found', 404, null)
-//                     reject(apiResponse)
-//                 } else {
-//                     console.log("result here is: ", result)
-//                     let apiResponse = response.generate(false, 'Updated Sender with sent requests', 200, result)
-//                     resolve(apiResponse)
-
-//                 }
-//             });// end user model update
-//         })
-//     } //end updateSender
-
-//     let updateReciever = () => {
-//         let subOptions = {
-//             friendId: data.senderId,
-//             friendName: data.senderName,
-//         }
-
-//         let options = {
-//             $push: {
-//                 friendRequestRecieved: {
-//                     $each: [subOptions]
-//                 }
-//             }
-//         }
-
-//         return new Promise((resolve, reject) => {
-//             UserModel.updateOne({ userId: data.recieverId }, options).exec((err, result) => {
-//                 if (err) {
-//                     console.log("Error in verifying", err)
-//                     logger.error(err.message, 'friendController:updateReciever', 10)
-//                     let apiResponse = response.generate(true, 'Failed To Update Reciever', 500, null)
-//                     reject(apiResponse)
-//                 } else if (check.isEmpty(result)) {
-//                     logger.info('Reciever not Found', 'friendController: updateReciever')
-//                     let apiResponse = response.generate(true, 'Reciever not Found', 404, null)
-//                     reject(apiResponse)
-//                 } else {
-//                     let apiResponse = response.generate(false, 'Updated Reciever with Recieved requests', 200, result)
-//                     console.log("apiResponse here is",apiResponse);
-//                     resolve(apiResponse)
-//                 }
-//             });// end user model update
-//         })
-//     } //end updateReciever
-
-//     validateUserInput(data)
-//         .then(updateSender)
-//         .then(updateReciever)
-//         .then((resolve) => {
-//             let apiResponse = response.generate(false, 'Friend Request Sent', 200, resolve)
-//             resolve(apiResponse)
-//         })
-//         .catch((err) => {
-//             console.log("errorhandler");
-//             console.log(err);
-//             reject(err)
-//         })
-// } // end of sending friend request function.
 
 
 let acceptFriendRequest = (req, res) => {
@@ -477,18 +372,6 @@ let cancelFriendRequest = (req, res) => {
 
     let updateSender = () => {
 
-
-        // let subOptions = {
-        //     friendId: req.body.recieverId,
-        //     friendName: req.body.recieverName,
-        // }
-
-        // let options = {
-        //     $pull: {
-        //         friendRequestSent: { subOptions }
-        //     }
-        // }
-
         let options = {
             $pull: {
                 friendRequestSent: {
@@ -517,16 +400,6 @@ let cancelFriendRequest = (req, res) => {
     } //end updateSender
 
     let updateReciever = () => {
-        // let subOptions = {
-        //     friendId: req.body.senderId,
-        //     friendName: req.body.senderName,
-        // }
-
-        // let options = {
-        //     $pull: {
-        //         friendRequestRecieved: { subOptions }
-        //     }
-        // }
 
         let options = {
             $pull: {
@@ -548,7 +421,6 @@ let cancelFriendRequest = (req, res) => {
                     let apiResponse = response.generate(true, 'Reciever not Found', 404, null)
                     reject(apiResponse)
                 } else {
-                    //let apiResponse = response.generate(false, 'Updated Reciever with Recieved requests', 200, result)
                     resolve(result)
                 }
             });// end user model update

@@ -51,7 +51,7 @@ async function sendMail(email, message) {
         subject: "Follow the link to reset your password", // Subject line
         text: message,
         //html: "<b>follow the link below to reset password <br/> </b><a>http://localhost:4200/reset/:token'  " // html body
-        html: "<b>follow the link below to reset password <br/> </b><a>http://www.bhaiyaji.club/reset/:token</a>  "
+        html: "<b>follow the link below to reset password <br/> </b><a>http://www.essindia.club/reset/:token</a>  "
     });
 
     console.log("Message sent: %s", info.messageId);
